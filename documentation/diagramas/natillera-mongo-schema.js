@@ -21,12 +21,26 @@ db.createCollection("users", {
   validator: {
     $jsonSchema: {
       bsonType: "object",
-      required: ["_id", "name", "email", "password_hash", "phone_number", "role_id", "status", "created_at"],
+      required: ["_id", "name", "email", "phone_number", "role_id", "status", "created_at"],
       properties: {
         _id: { bsonType: "objectId" },
         name: { bsonType: "string", minLength: 1 },
         email: { bsonType: "string", minLength: 3 },
+        // Opcional: los usuarios que solo ingresan con OAuth 2.0 no tienen contraseña local.
         password_hash: { bsonType: "string", minLength: 20 },
+        // Identidades OAuth 2.0 vinculadas (RF-15); no se guardan tokens del proveedor.
+        auth_providers: {
+          bsonType: "array",
+          items: {
+            bsonType: "object",
+            required: ["provider", "subject", "linked_at"],
+            properties: {
+              provider: { enum: ["google"] },
+              subject: { bsonType: "string", minLength: 1 },
+              linked_at: { bsonType: "date" },
+            },
+          },
+        },
         phone_number: { bsonType: "string", minLength: 1 },
         role_id: { bsonType: "objectId" },
         status: { enum: ["active", "disabled"] },
@@ -299,6 +313,10 @@ db.createCollection("notifications", {
 });
 
 db.users.createIndex({ email: 1 }, { unique: true });
+db.users.createIndex(
+  { "auth_providers.provider": 1, "auth_providers.subject": 1 },
+  { unique: true, partialFilterExpression: { "auth_providers.subject": { $exists: true } } }
+);
 db.roles.createIndex({ name: 1 }, { unique: true });
 db.natilleras.createIndex({ name: 1 });
 db.memberships.createIndex({ natillera_id: 1, user_id: 1 }, { unique: true });

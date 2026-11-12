@@ -12,7 +12,8 @@ erDiagram
         ObjectId _id PK
         string name
         string email UK
-        string password_hash
+        string password_hash "opcional"
+        array auth_providers "provider, subject, linked_at"
         string phone_number
         ObjectId role_id FK
         string status
@@ -105,7 +106,7 @@ erDiagram
     COLLATERALS {
         ObjectId _id PK
         ObjectId natillera_id FK
-        ObjectId loan_id FK UK
+        ObjectId loan_id FK, UK
         string barcode UK
         string description
         string storage_location
@@ -220,5 +221,5 @@ erDiagram
     %% El maximo de 5 evidencias y 50 MiB totales por operacion, y el limite de retiro por saldo disponible, se validan en la aplicacion.
     %% ACCOUNTS.natillera_id debe coincidir con la natillera de su MEMBERSHIP.
     %% Las referencias entre documentos, la pertenencia al mismo tenant, la devolucion de prendas tras pago total y estados condicionados se validan en la aplicacion.
-    %% Indices unicos: USERS(email), ROLES(name), MEMBERSHIPS(natillera_id, user_id), ACCOUNTS(membership_id y natillera_id/account_number), COLLATERALS(loan_id y barcode), LOAN_INSTALLMENTS(loan_id/installment_number), TRANSACTIONS(natillera_id/idempotency_key).
+    %% Indices unicos: USERS(email), USERS(auth_providers.provider y auth_providers.subject), ROLES(name), MEMBERSHIPS(natillera_id, user_id), ACCOUNTS(membership_id y natillera_id/account_number), COLLATERALS(loan_id y barcode), LOAN_INSTALLMENTS(loan_id/installment_number), TRANSACTIONS(natillera_id/idempotency_key).
 ```
